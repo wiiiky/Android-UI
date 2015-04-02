@@ -3,6 +3,7 @@ package com.wiky.ui.layout;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import com.wiky.pageview.R;
 import com.wiky.ui.adapter.PageAdapter;
 
 
@@ -21,6 +23,10 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
     private PageAdapter mAdapter;
     private FrameLayout mFrame1;
     private FrameLayout mFrame2;
+    private float mBreakThroughPoint = 0.5f; /* 临界点 */
+
+    private int mResetDuration = 250;
+    private int mNextDuration = 150;
 
     private OnPageChangeListener mListener;
 
@@ -37,13 +43,13 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
 
     public PageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
+        init(context, attrs);
     }
 
     /*
      * Initialize
      */
-    private void init(Context context) {
+    private void init(Context context, AttributeSet attrs) {
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         mFrame1 = new FrameLayout(context);
@@ -60,6 +66,11 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         mCurrentPos = 0;
         mAdapter = null;
         mListener = null;
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PageView);
+        mBreakThroughPoint = a.getFloat(R.styleable.PageView_breakThroughPoint, 0.5f);
+        mResetDuration = a.getInt(R.styleable.PageView_resetDuration, 250);
+        mNextDuration = a.getInt(R.styleable.PageView_nextDuration, 150);
     }
 
     public void setAdapter(PageAdapter adapter) {
@@ -68,8 +79,8 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         mFrame2.setVisibility(GONE);
 
         mCurrentPos = 0;
-        setView(mFrame1, 0);
-        setView(mFrame2, 1);
+        setDisplayView(mFrame1, 0);
+        setDisplayView(mFrame2, 1);
 
         mFrame1.setOnTouchListener(this);
     }
@@ -81,7 +92,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
     /*
      * 给FrameLayout设置一个View
      */
-    private void setView(FrameLayout frame, int pos) {
+    private void setDisplayView(FrameLayout frame, int pos) {
         if (pos >= mAdapter.getCount()) {
             frame.setVisibility(GONE);
         } else {
@@ -106,12 +117,14 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
                 mDownY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (y - mDownY < 0) {
-                    v.setY((int) (y - mDownY) / 1.3f);
+                float fy = y - mDownY;
+                FrameLayout other = getOtherFrameLayout((FrameLayout) v);
+                if (fy < 0) {
+                    v.setY((int) fy / 1.3f);
                 }
                 break;
             default:
-                if (v.getY() > -500) {
+                if (v.getY() > -getHeight() * mBreakThroughPoint) {
                     resetView(v);
                 } else {
                     nextView(v);
@@ -126,7 +139,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
      */
     private void resetView(final View v) {
         ObjectAnimator ani = ObjectAnimator.ofFloat(v, "y", 0);
-        ani.setDuration(250);
+        ani.setDuration(mResetDuration);
         ani.setInterpolator(new AccelerateInterpolator());
         ani.addListener(new Animator.AnimatorListener() {
             @Override
@@ -158,7 +171,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
      */
     private void nextView(final View v) {
         ObjectAnimator ani = ObjectAnimator.ofFloat(v, "y", -getHeight());
-        ani.setDuration(100);
+        ani.setDuration(mNextDuration);
         ani.setInterpolator(new AccelerateInterpolator());
         ani.addListener(new Animator.AnimatorListener() {
             @Override
@@ -179,18 +192,14 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
                     mFrame2.setVisibility(GONE);
                     return;
                 }
-                FrameLayout upper, lower = (FrameLayout) v;
-                if (v == mFrame1) {
-                    upper = mFrame2;
-                } else {
-                    upper = mFrame1;
-                }
+                FrameLayout lower = (FrameLayout) v;
+                FrameLayout upper = getOtherFrameLayout((FrameLayout) v);
                 upper.setOnTouchListener(PageView.this);
                 upper.bringToFront();
                 lower.setY(0);
 
-                setView(upper, mCurrentPos);
-                setView(lower, mCurrentPos + 1);
+                setDisplayView(upper, mCurrentPos);
+                setDisplayView(lower, mCurrentPos + 1);
             }
 
             @Override
@@ -203,6 +212,16 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         });
         v.setOnTouchListener(null);
         ani.start();
+    }
+
+    /*
+     * 返回另外一个FrameLayout
+     */
+    private FrameLayout getOtherFrameLayout(FrameLayout frameLayout) {
+        if (frameLayout == mFrame1) {
+            return mFrame2;
+        }
+        return mFrame1;
     }
 
 

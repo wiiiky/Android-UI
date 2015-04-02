@@ -1,8 +1,7 @@
 <resources>
     <declare-styleable name="PageView">
-        <attr name="exampleString" format="string" />
-        <attr name="exampleDimension" format="dimension" />
-        <attr name="exampleColor" format="color" />
-        <attr name="exampleDrawable" format="color|reference" />
+        <attr name="breakThroughPoint" format="float" />
+        <attr name="resetDuration" format="integer" />
+        <attr name="nextDuration" format="integer" />
     </declare-styleable>
 </resources>

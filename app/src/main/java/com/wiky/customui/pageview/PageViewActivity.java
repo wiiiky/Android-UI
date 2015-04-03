@@ -26,7 +26,8 @@ public class PageViewActivity extends ActionBarActivity {
         ArrayList<PageAdapterImpl.PageItem> list = new ArrayList<>();
         list.add(new PageAdapterImpl.PageItem(R.drawable.pikaqiu, "hello world", "#ff0000"));
         list.add(new PageAdapterImpl.PageItem(R.drawable.xidada, "asjdfajsdfjalkadfjadfakdfkas;df", "#00ff00"));
-        list.add(new PageAdapterImpl.PageItem(R.drawable.pikaqiu, "hello Everyone", "#0000ff"));
+        list.add(new PageAdapterImpl.PageItem(R.drawable.nsapassword, "hello Everyone", "#0000ff"));
+        list.add(new PageAdapterImpl.PageItem(R.drawable.b823kajsdfe, "I don't understand why people believe in so much thing that is ridiculous", "#ff00ff"));
         mPageView.setAdapter(new PageAdapterImpl(this, list));
 
         mPageView.setOnPageChangeListener(new PageView.OnPageChangeListener() {

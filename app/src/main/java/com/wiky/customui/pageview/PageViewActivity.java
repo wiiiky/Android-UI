@@ -36,7 +36,12 @@ public class PageViewActivity extends ActionBarActivity {
             }
 
             @Override
-            public void onCancelled(int pos) {
+            public void onNextCancelled(int pos) {
+
+            }
+
+            @Override
+            public void onPrevCancelled(int pos) {
 
             }
         });

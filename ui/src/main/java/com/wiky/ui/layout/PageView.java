@@ -18,6 +18,8 @@ import com.wiky.ui.adapter.PageAdapter;
 
 /**
  * 上滑翻页
+ * XXX 在测试例子中在前两次动画会卡一下
+ * 两个切换临界点都表示从下往上的部分在整个纵向界面中所占的百分比
  */
 public class PageView extends RelativeLayout implements View.OnTouchListener {
     private PageAdapter mAdapter;
@@ -63,9 +65,9 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         mNextFrame = createFrameLayout(context);
         mPrevFrame = createFrameLayout(context);
 
-        addView(mNextFrame, params);
-        addView(mCurrentFrame, params);
-        addView(mPrevFrame, params);
+        this.addView(mNextFrame, params);
+        this.addView(mCurrentFrame, params);
+        this.addView(mPrevFrame, params);
 
         mCurrentPos = 0;
         mAdapter = null;
@@ -88,11 +90,19 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         FrameLayout frameLayout = new FrameLayout(context);
         frameLayout.setTag(null);
         frameLayout.setVisibility(INVISIBLE);
+        frameLayout.setY(0.0f);
         return frameLayout;
     }
 
     public void setAdapter(PageAdapter adapter) {
         mAdapter = adapter;
+
+        mCurrentFrame.removeAllViews();
+        mCurrentFrame.setTag(null);
+        mNextFrame.removeAllViews();
+        mNextFrame.setTag(null);
+        mPrevFrame.removeAllViews();
+        mPrevFrame.setTag(null);
 
         mCurrentPos = 0;
         setDisplayView(mCurrentFrame, 0);

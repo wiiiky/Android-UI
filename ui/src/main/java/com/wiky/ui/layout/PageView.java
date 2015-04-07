@@ -4,11 +4,13 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -18,7 +20,6 @@ import com.wiky.ui.adapter.PageAdapter;
 
 /**
  * 上滑翻页
- * XXX 在测试例子中在前两次动画会卡一下
  * 两个切换临界点都表示从下往上的部分在整个纵向界面中所占的百分比
  */
 public class PageView extends RelativeLayout implements View.OnTouchListener {
@@ -59,14 +60,15 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
      * Initialize
      */
     private void init(Context context, AttributeSet attrs) {
-        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
         mCurrentFrame = createFrameLayout(context);
         mNextFrame = createFrameLayout(context);
         mPrevFrame = createFrameLayout(context);
 
+        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         this.addView(mNextFrame, params);
+        params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         this.addView(mCurrentFrame, params);
+        params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         this.addView(mPrevFrame, params);
 
         mCurrentPos = 0;
@@ -88,9 +90,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
      */
     private FrameLayout createFrameLayout(Context context){
         FrameLayout frameLayout = new FrameLayout(context);
-        frameLayout.setTag(null);
         frameLayout.setVisibility(INVISIBLE);
-        frameLayout.setY(0.0f);
         return frameLayout;
     }
 
@@ -98,11 +98,8 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         mAdapter = adapter;
 
         mCurrentFrame.removeAllViews();
-        mCurrentFrame.setTag(null);
         mNextFrame.removeAllViews();
-        mNextFrame.setTag(null);
         mPrevFrame.removeAllViews();
-        mPrevFrame.setTag(null);
 
         mCurrentPos = 0;
         setDisplayView(mCurrentFrame, 0);
@@ -123,13 +120,12 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         if (pos >= mAdapter.getCount() || pos < 0) {
             frame.setVisibility(INVISIBLE);
         } else {
-            View v = mAdapter.getView(pos, (View) frame.getTag(), frame);
+            View v = mAdapter.getView(pos, frame.getChildAt(0), frame);
             if (frame.getChildAt(0) != v) {
                 LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 frame.removeAllViews();
                 frame.addView(v, params);
             }
-            frame.setTag(v);
             frame.setVisibility(VISIBLE);
         }
     }
@@ -224,16 +220,22 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
     private void forwardToNextFrame() {
         ObjectAnimator ani = ObjectAnimator.ofFloat(mCurrentFrame, "y", -getHeight());
         ani.setDuration(mNextDuration);
-        ani.setInterpolator(new AccelerateInterpolator());
+        ani.setInterpolator(new DecelerateInterpolator());
         ani.addListener(new AnimatorEndListener() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mCurrentPos++;
-                if (mListener != null) {
-                    mListener.onPageChanged(mCurrentPos);
-                }
-                rollToNext();
-                setOnTouchListener(PageView.this);
+                new Handler().postDelayed(new Runnable() {
+                    /* 这里需要延时一小段时间后才调用刷新的方法，因为在动画结束后立即调用会引起一个动画卡顿 */
+                    @Override
+                    public void run() {
+                        mCurrentPos++;
+                        if (mListener != null) {
+                            mListener.onPageChanged(mCurrentPos);
+                        }
+                        rollToNext();
+                        setOnTouchListener(PageView.this);
+                    }
+                }, 50);
             }
         });
         setOnTouchListener(null);
@@ -246,7 +248,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
     private void backToPrevFrame() {
         ObjectAnimator ani = ObjectAnimator.ofFloat(mPrevFrame, "y", 0);
         ani.setDuration(mPrevDuration);
-        ani.setInterpolator(new AccelerateInterpolator());
+        ani.setInterpolator(new DecelerateInterpolator());
         ani.addListener(new AnimatorEndListener() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -278,9 +280,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         mCurrentFrame.setY(0);
         mNextFrame.setY(0);
 
-        setDisplayView(mCurrentFrame, mCurrentPos);
         setDisplayView(mNextFrame, mCurrentPos + 1);
-        setDisplayView(mPrevFrame, mCurrentPos - 1);
     }
 
     /*
@@ -299,8 +299,6 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
         mCurrentFrame.setY(0);
         mNextFrame.setY(0);
 
-        setDisplayView(mCurrentFrame, mCurrentPos);
-        setDisplayView(mNextFrame, mCurrentPos + 1);
         setDisplayView(mPrevFrame, mCurrentPos - 1);
     }
 
@@ -315,11 +313,11 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
      * 回调接口
      */
     public interface OnPageChangeListener {
-        public void onPageChanged(int pos);         /* 翻页时调用,pos表示新页  */
+        void onPageChanged(int pos);         /* 翻页时调用,pos表示新页  */
 
-        public void onNextCancelled(int pos);       /* 取消翻页时调用, pos表示当前页  */
+        void onNextCancelled(int pos);       /* 取消翻页时调用, pos表示当前页  */
 
-        public void onPrevCancelled(int pos);       /* 取消向前翻页时候调用，pos表示当前页 */
+        void onPrevCancelled(int pos);       /* 取消向前翻页时候调用，pos表示当前页 */
     }
 
     private abstract class AnimatorEndListener implements Animator.AnimatorListener {

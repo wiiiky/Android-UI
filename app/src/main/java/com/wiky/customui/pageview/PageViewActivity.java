@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.wiky.customui.R;
-import com.wiky.ui.layout.PageView;
+import com.wiky.ui.container.PageView;
 
 import java.util.ArrayList;
 

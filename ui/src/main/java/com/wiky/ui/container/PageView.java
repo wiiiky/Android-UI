@@ -1,4 +1,4 @@
-package com.wiky.ui.layout;
+package com.wiky.ui.container;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -88,7 +88,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
     /*
      * 创建基本的FrameLayout
      */
-    private FrameLayout createFrameLayout(Context context){
+    private FrameLayout createFrameLayout(Context context) {
         FrameLayout frameLayout = new FrameLayout(context);
         frameLayout.setVisibility(INVISIBLE);
         return frameLayout;

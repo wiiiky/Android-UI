@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.wiky.customui.imageview.ImageViewerActivity;
 import com.wiky.customui.pageview.PageViewActivity;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         ArrayList<MenuAdapter.MenuItem> data = new ArrayList<>();
         data.add(new MenuAdapter.MenuItem("上滑翻页 - PageView", 0));
+        data.add(new MenuAdapter.MenuItem("缩放的图片 - ImageViewer", 1));
 
         mListView = (ListView) findViewById(R.id.list_view);
         mListView.setOnItemClickListener(this);
@@ -57,10 +59,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MenuAdapter.MenuItem item = (MenuAdapter.MenuItem) parent.getItemAtPosition(position);
+        Intent intent = null;
         if (item.mId == 0) {
-            Intent intent = new Intent(this, PageViewActivity.class);
-            startActivity(intent);
-            overridePendingTransition(R.anim.from_right, R.anim.to_left);
+            intent = new Intent(this, PageViewActivity.class);
+        } else if (item.mId == 1) {
+            intent = new Intent(this, ImageViewerActivity.class);
         }
+        startActivity(intent);
+        overridePendingTransition(R.anim.from_right, R.anim.to_left);
     }
 }

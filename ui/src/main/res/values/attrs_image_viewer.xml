@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ImageViewer">
+        <attr name="src" format="integer" />
+        <attr name="background_color" format="color|integer|string" />
+    </declare-styleable>
+</resources>

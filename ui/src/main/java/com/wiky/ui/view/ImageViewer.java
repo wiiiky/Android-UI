@@ -30,6 +30,8 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
     private Rect mBitmapRect = new Rect();
     private GoodGestureDetector mGestureDetector;
     private RectF mOriginRect = new RectF();
+    private ImageSize mImageSize = ImageSize.SMALL;
+    private RectF mLargeRect = new RectF();
 
     public ImageViewer(Context context) {
         this(context, null);
@@ -82,6 +84,31 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         mCanvasRect.top = y - (y - mCanvasRect.top) * factor;
         mCanvasRect.right = x - (x - mCanvasRect.right) * factor;
         mCanvasRect.bottom = y - (y - mCanvasRect.bottom) * factor;
+
+        scale = getCanvasScale();
+        if (scale <= 1.0f) {
+            mImageSize = ImageSize.SMALL;
+        } else {
+            mImageSize = ImageSize.LARGE;
+            float width = getWidth();
+            float height = getHeight();
+            float cWidth = mCanvasRect.width();
+            float cHeight = mCanvasRect.height();
+            if (width < cWidth) {
+                mLargeRect.left = width - cWidth;
+                mLargeRect.right = cWidth;
+            } else {
+                mLargeRect.left = 0;
+                mLargeRect.right = width;
+            }
+            if (height < cHeight) {
+                mLargeRect.top = height - cHeight;
+                mLargeRect.bottom = cHeight;
+            } else {
+                mLargeRect.top = 0;
+                mLargeRect.bottom = height;
+            }
+        }
         invalidate();
     }
 
@@ -89,13 +116,41 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
      * 在当前位置的基础上移动(dx,dy)
      */
     private void doTranslate(float dx, float dy, boolean force) {
-        if (getCanvasScale() <= 1.0f && force == false) {
-            return;
+        if (!force) {
+            if (mImageSize == ImageSize.SMALL) {
+                return;
+            }
+            float left = mCanvasRect.left - dx;
+            float top = mCanvasRect.top - dy;
+            float right = mCanvasRect.right - dx;
+            float bottom = mCanvasRect.bottom - dy;
+            if (left < mLargeRect.left && dx > 0) {
+                if (mCanvasRect.left > mLargeRect.left) {
+                    dx = mCanvasRect.left - mLargeRect.left;
+                } else {
+                    dx = 0;
+                }
+            } else if (right > mLargeRect.right && dx < 0) {
+                if (mCanvasRect.right < mLargeRect.right) {
+                    dx = mCanvasRect.right - mLargeRect.right;
+                } else {
+                    dx = 0;
+                }
+            }
+            if (top < mLargeRect.top && dy > 0) {
+                if (mCanvasRect.top > mLargeRect.top) {
+                    dy = mCanvasRect.top - mLargeRect.top;
+                } else {
+                    dy = 0;
+                }
+            } else if (bottom > mLargeRect.bottom && dy < 0) {
+                if (mCanvasRect.bottom < mLargeRect.bottom) {
+                    dy = mCanvasRect.bottom - mLargeRect.bottom;
+                } else {
+                    dy = 0;
+                }
+            }
         }
-        float left = mCanvasRect.left - dx;
-        float top = mCanvasRect.top - dy;
-        float right = mCanvasRect.right - dx;
-        float bottom = mCanvasRect.bottom - dy;
         mCanvasRect.left -= dx;
         mCanvasRect.top -= dy;
         mCanvasRect.right -= dx;
@@ -185,6 +240,11 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             return mCanvasRect.width() / getWidth();
         }
         return mCanvasRect.height() / getHeight();
+    }
+
+    private enum ImageSize {
+        SMALL,
+        LARGE,
     }
 
     private class TranslateAnimator {

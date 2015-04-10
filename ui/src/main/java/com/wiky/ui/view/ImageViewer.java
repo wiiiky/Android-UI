@@ -1,5 +1,7 @@
 package com.wiky.ui.view;
 
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -25,13 +27,14 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
     private float mMinScale = 1.0f;
     private float mMaxScale = 2.0f;
     private RectF mCanvasRect = new RectF();    /* 避免在onDraw中分配内存 */
-    private RectF mOriginRect = new RectF();
     private Rect mBitmapRect = new Rect();
     private GoodGestureDetector mGestureDetector;
+    private RectF mOriginRect = new RectF();
 
     public ImageViewer(Context context) {
         this(context, null);
     }
+
     public ImageViewer(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -70,13 +73,11 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         setOnTouchListener(this);
     }
 
-    private void setScale(float x, float y, float factor) {
-        if (mCanvasRect.width() / mOriginRect.width() <= mMinScale && factor <= 1.0f) {
-            return;
-        } else if (mCanvasRect.width() / mOriginRect.width() >= mMaxScale && factor >= 1.0f) {
+    private void doScale(float x, float y, float factor) {
+        float scale = getBitmapScale();
+        if (factor == 1.0f || (factor > 1.0f && scale >= mMaxScale * 1.2) || (factor < 1.0f && scale <= mMinScale * 0.8)) {
             return;
         }
-
         mCanvasRect.left = x - (x - mCanvasRect.left) * factor;
         mCanvasRect.top = y - (y - mCanvasRect.top) * factor;
         mCanvasRect.right = x - (x - mCanvasRect.right) * factor;
@@ -84,10 +85,20 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         invalidate();
     }
 
-    private void setTranslate(float dx, float dy) {
+    /*
+     * 在当前位置的基础上移动(dx,dy)
+     */
+    private void doTranslate(float dx, float dy, boolean force) {
+        if (getCanvasScale() <= 1.0f && force == false) {
+            return;
+        }
+        float left = mCanvasRect.left - dx;
+        float top = mCanvasRect.top - dy;
+        float right = mCanvasRect.right - dx;
+        float bottom = mCanvasRect.bottom - dy;
         mCanvasRect.left -= dx;
-        mCanvasRect.right -= dx;
         mCanvasRect.top -= dy;
+        mCanvasRect.right -= dx;
         mCanvasRect.bottom -= dy;
         invalidate();
     }
@@ -109,11 +120,11 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             }
             float cx = width / 2.0f;
             float cy = height / 2.0f;
-            mOriginRect.left = cx - bWidth / 2.0f * mMinScale;
-            mOriginRect.right = cx + bWidth / 2.0f * mMinScale;
-            mOriginRect.top = cy - bHeight / 2.0f * mMinScale;
-            mOriginRect.bottom = cy + bHeight / 2.0f * mMinScale;
-            mCanvasRect.set(mOriginRect);
+            mCanvasRect.left = cx - bWidth / 2.0f * mMinScale;
+            mCanvasRect.right = cx + bWidth / 2.0f * mMinScale;
+            mCanvasRect.top = cy - bHeight / 2.0f * mMinScale;
+            mCanvasRect.bottom = cy + bHeight / 2.0f * mMinScale;
+            mOriginRect.set(mCanvasRect);
         }
     }
 
@@ -140,19 +151,142 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
 
     @Override
     public void onScroll(float dx, float dy) {
-        setTranslate(dx, dy);
+        doTranslate(dx, dy, false);
     }
 
     @Override
     public void onScale(float cx, float cy, float factor) {
-        setScale(cx, cy, factor);
+        doScale(cx, cy, factor);
     }
 
     @Override
     public void onEnd() {
+        float scale = getBitmapScale();
+        if (scale < mMinScale) {
+            new ScaleAnimator(scale, mMinScale, 200).start();
+        } else if (scale > mMaxScale) {
+            new ScaleAnimator(scale, mMaxScale, 200).start();
+        }
+        if (getCanvasScale() <= 1.0f) {
+            new TranslateAnimator(mCanvasRect.centerX(), mCanvasRect.centerY(),
+                    mOriginRect.centerX(), mOriginRect.centerY(), 200).start();
+        }
     }
 
-    private float getCurrentScale() {
-        return mCanvasRect.width() / mOriginRect.width();
+    private float getBitmapScale() {
+        if (mCanvasRect.height() > mCanvasRect.width()) {
+            return mCanvasRect.width() / mOriginRect.width();
+        }
+        return mCanvasRect.height() / mOriginRect.height();
+    }
+
+    private float getCanvasScale() {
+        if (mCanvasRect.height() > mCanvasRect.width()) {
+            return mCanvasRect.width() / getWidth();
+        }
+        return mCanvasRect.height() / getHeight();
+    }
+
+    private class TranslateAnimator {
+        private ValueAnimator mXAnimator;
+        private ValueAnimator mYAnimator;
+
+        public TranslateAnimator(float fromx, float fromy, float tox, float toy, int duration) {
+            mXAnimator = ValueAnimator.ofFloat(fromx, tox);
+            mXAnimator.setDuration(duration);
+            mXAnimator.addUpdateListener(new TranslateAnimatorListener(fromx, tox, true) {
+                @Override
+                public void onAnimationEnd() {
+                    ImageViewer.this.setOnTouchListener(ImageViewer.this);
+                }
+            });
+            mYAnimator = ValueAnimator.ofFloat(fromy, toy);
+            mYAnimator.setDuration(duration);
+            mYAnimator.addUpdateListener(new TranslateAnimatorListener(fromy, toy, false) {
+                @Override
+                public void onAnimationEnd() {
+                    ImageViewer.this.setOnTouchListener(ImageViewer.this);
+                }
+            });
+        }
+
+        public void start() {
+            ImageViewer.this.setOnTouchListener(null);
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(mXAnimator, mYAnimator);
+            set.start();
+        }
+    }
+
+    private abstract class TranslateAnimatorListener implements ValueAnimator.AnimatorUpdateListener {
+        private float mFrom;
+        private float mTo;
+        private boolean mX;
+
+        public TranslateAnimatorListener(float from, float to, boolean x) {
+            mFrom = from;
+            mTo = to;
+            mX = x;
+        }
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            Float v = (Float) animation.getAnimatedValue();
+            float ds = v - mFrom;
+            mFrom = v;
+            if (mX) {
+                doTranslate(-ds, 0, true);
+            } else {
+                doTranslate(0, -ds, true);
+            }
+            if (v == mTo) {
+                onAnimationEnd();
+            }
+        }
+
+        public abstract void onAnimationEnd();
+    }
+
+    private class ScaleAnimator {
+        private ValueAnimator mAnimator;
+
+        public ScaleAnimator(float from, float to, int duration) {
+            mAnimator = ValueAnimator.ofFloat(from, to);
+            mAnimator.setDuration(duration);
+            mAnimator.addUpdateListener(new ScaleAnimationListener(from, to) {
+                @Override
+                public void onAnimationEnd() {
+                    ImageViewer.this.setOnTouchListener(ImageViewer.this);
+                }
+            });
+        }
+
+        public void start() {
+            ImageViewer.this.setOnTouchListener(null);
+            mAnimator.start();
+        }
+    }
+
+    private abstract class ScaleAnimationListener implements ValueAnimator.AnimatorUpdateListener {
+        private float mFrom;
+        private float mTo;
+
+        public ScaleAnimationListener(float from, float to) {
+            mFrom = from;
+            mTo = to;
+        }
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            Float scale = (Float) animation.getAnimatedValue();
+            float ds = scale / mFrom;
+            mFrom = scale;
+            doScale(mCanvasRect.centerX(), mCanvasRect.centerY(), ds);
+            if (scale == mTo) {
+                onAnimationEnd();
+            }
+        }
+
+        public abstract void onAnimationEnd();
     }
 }

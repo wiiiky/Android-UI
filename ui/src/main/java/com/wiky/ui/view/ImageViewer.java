@@ -7,7 +7,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,15 +21,24 @@ import com.wiky.ui.utils.GoodGestureDetector;
  * Created by wiky on 4/8/15.
  */
 public class ImageViewer extends View implements View.OnTouchListener, GoodGestureDetector.OnGestureListener {
+
+    private static final float DEFAULT_MIN_BLOW_SCALE = 0.75f;
+    private static final float DEFAULT_MAX_OVER_SCALE = 1.5f;
+    private static final float DEFAULT_MAX_SCALE = 2.5f;
+    private static final float DEFAULT_MAX_OVER_TRANSLATE = 0.1f;
+
     private Bitmap mBitmap = null;
     private int mBackgroundColor;
     private float mMinScale = 1.0f;
-    private float mMaxScale = 2.0f;
+    private float mMaxBlowScale;
+    private float mMaxScale;
+    private float mMaxOverScale;
+    private float mMaxOverTrans;
+    private float mMaxOverTranslate;
     private RectF mCanvasRect = new RectF();    /* 避免在onDraw中分配内存 */
-    private Rect mBitmapRect = new Rect();
     private GoodGestureDetector mGestureDetector;
     private RectF mOriginRect = new RectF();
-    private ImageSize mImageSize = ImageSize.SMALL;
+    private CanvasScaleType mCanvasScaleType = CanvasScaleType.SMALL;
     private RectF mLargeRect = new RectF();
 
     public ImageViewer(Context context) {
@@ -54,10 +62,6 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             Drawable drawable = context.getResources().getDrawable(id);
             if (drawable != null) {
                 mBitmap = ((BitmapDrawable) drawable).getBitmap();
-                mBitmapRect.top = 0;
-                mBitmapRect.left = 0;
-                mBitmapRect.right = mBitmap.getWidth();
-                mBitmapRect.bottom = mBitmap.getHeight();
             }
         }
         mBackgroundColor = a.getColor(R.styleable.ImageViewer_background_color, Color.BLACK);
@@ -71,13 +75,19 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         }
         a.recycle();
 
+        mMaxScale = a.getFloat(R.styleable.ImageViewer_maxScale, DEFAULT_MAX_SCALE);
+        mMaxOverTrans = a.getFloat(R.styleable.ImageViewer_maxOverTrans, DEFAULT_MAX_OVER_TRANSLATE);
+        mMaxBlowScale = a.getFloat(R.styleable.ImageViewer_maxBlowScale, DEFAULT_MIN_BLOW_SCALE);
+        mMaxOverScale = a.getFloat(R.styleable.ImageViewer_maxOverScale, DEFAULT_MAX_OVER_SCALE);
+
         mGestureDetector = new GoodGestureDetector(context, this);
         setOnTouchListener(this);
     }
 
+    /* 在现有基础上以(x,y)为中心缩放 */
     private void doScale(float x, float y, float factor) {
         float scale = getBitmapScale();
-        if (factor == 1.0f || (factor > 1.0f && scale >= mMaxScale * 1.2) || (factor < 1.0f && scale <= mMinScale * 0.8)) {
+        if (factor == 1.0f || (factor > 1.0f && scale >= mMaxScale * mMaxOverScale) || (factor < 1.0f && scale <= mMinScale * mMaxBlowScale)) {
             return;
         }
         mCanvasRect.left = x - (x - mCanvasRect.left) * factor;
@@ -85,11 +95,8 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         mCanvasRect.right = x - (x - mCanvasRect.right) * factor;
         mCanvasRect.bottom = y - (y - mCanvasRect.bottom) * factor;
 
-        scale = getCanvasScale();
-        if (scale <= 1.0f) {
-            mImageSize = ImageSize.SMALL;
-        } else {
-            mImageSize = ImageSize.LARGE;
+        mCanvasScaleType = getCanvasScaleType();
+        if (mCanvasScaleType != CanvasScaleType.SMALL) {
             float width = getWidth();
             float height = getHeight();
             float cWidth = mCanvasRect.width();
@@ -98,15 +105,15 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
                 mLargeRect.left = width - cWidth;
                 mLargeRect.right = cWidth;
             } else {
-                mLargeRect.left = 0;
-                mLargeRect.right = width;
+                mLargeRect.left = (width - cWidth) / 2.0f;
+                mLargeRect.right = (width + cWidth) / 2.0f;
             }
             if (height < cHeight) {
                 mLargeRect.top = height - cHeight;
                 mLargeRect.bottom = cHeight;
             } else {
-                mLargeRect.top = 0;
-                mLargeRect.bottom = height;
+                mLargeRect.top = (height - cHeight) / 2.0f;
+                mLargeRect.bottom = (height + cHeight) / 2.0f;
             }
         }
         invalidate();
@@ -117,35 +124,41 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
      */
     private void doTranslate(float dx, float dy, boolean force) {
         if (!force) {
-            if (mImageSize == ImageSize.SMALL) {
+            if (mCanvasScaleType == CanvasScaleType.SMALL) {
                 return;
             }
             float left = mCanvasRect.left - dx;
             float top = mCanvasRect.top - dy;
             float right = mCanvasRect.right - dx;
             float bottom = mCanvasRect.bottom - dy;
-            if (left < mLargeRect.left && dx > 0) {
-                if (mCanvasRect.left > mLargeRect.left) {
-                    dx = mCanvasRect.left - mLargeRect.left;
+            RectF largeRect = new RectF(mLargeRect);
+            largeRect.left -= mMaxOverTranslate;
+            largeRect.right += mMaxOverTranslate;
+            largeRect.top -= mMaxOverTranslate;
+            largeRect.bottom += mMaxOverTranslate;
+            /* 下面代码调整移动距离 */
+            if (left < largeRect.left && dx > 0) {
+                if (mCanvasRect.left > largeRect.left) {
+                    dx = mCanvasRect.left - largeRect.left;
                 } else {
                     dx = 0;
                 }
-            } else if (right > mLargeRect.right && dx < 0) {
-                if (mCanvasRect.right < mLargeRect.right) {
-                    dx = mCanvasRect.right - mLargeRect.right;
+            } else if (right > largeRect.right && dx < 0) {
+                if (mCanvasRect.right < largeRect.right) {
+                    dx = mCanvasRect.right - largeRect.right;
                 } else {
                     dx = 0;
                 }
             }
-            if (top < mLargeRect.top && dy > 0) {
-                if (mCanvasRect.top > mLargeRect.top) {
-                    dy = mCanvasRect.top - mLargeRect.top;
+            if (top < largeRect.top && dy > 0) {
+                if (mCanvasRect.top > largeRect.top) {
+                    dy = mCanvasRect.top - largeRect.top;
                 } else {
                     dy = 0;
                 }
-            } else if (bottom > mLargeRect.bottom && dy < 0) {
-                if (mCanvasRect.bottom < mLargeRect.bottom) {
-                    dy = mCanvasRect.bottom - mLargeRect.bottom;
+            } else if (bottom > largeRect.bottom && dy < 0) {
+                if (mCanvasRect.bottom < largeRect.bottom) {
+                    dy = mCanvasRect.bottom - largeRect.bottom;
                 } else {
                     dy = 0;
                 }
@@ -180,6 +193,8 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             mCanvasRect.top = cy - bHeight / 2.0f * mMinScale;
             mCanvasRect.bottom = cy + bHeight / 2.0f * mMinScale;
             mOriginRect.set(mCanvasRect);
+
+            mMaxOverTranslate = width * mMaxOverTrans;
         }
     }
 
@@ -191,7 +206,7 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         if (mBitmap == null) {
             return;
         }
-        canvas.drawBitmap(mBitmap, mBitmapRect, mCanvasRect, null);
+        canvas.drawBitmap(mBitmap, null, mCanvasRect, null);
     }
 
     @Override
@@ -222,10 +237,7 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         } else if (scale > mMaxScale) {
             new ScaleAnimator(scale, mMaxScale, 200).start();
         }
-        if (getCanvasScale() <= 1.0f) {
-            new TranslateAnimator(mCanvasRect.centerX(), mCanvasRect.centerY(),
-                    mOriginRect.centerX(), mOriginRect.centerY(), 200).start();
-        }
+        adjustCanvas();
     }
 
     private float getBitmapScale() {
@@ -235,16 +247,60 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         return mCanvasRect.height() / mOriginRect.height();
     }
 
-    private float getCanvasScale() {
-        if (mCanvasRect.height() > mCanvasRect.width()) {
-            return mCanvasRect.width() / getWidth();
+    /*
+     * 获取当前图片显示尺寸与view尺寸的比例类型
+     */
+    private CanvasScaleType getCanvasScaleType() {
+        float cWidth = mCanvasRect.width();
+        float cHeight = mCanvasRect.height();
+        float widthScale = cWidth / getWidth();
+        float heightScale = cHeight / getHeight();
+        if (widthScale <= 1.0f && heightScale <= 1.0f) {
+            return CanvasScaleType.SMALL;
         }
-        return mCanvasRect.height() / getHeight();
+        if (cWidth < cHeight) {
+            if (widthScale > 1.0f && heightScale <= 1.0f) {
+                return CanvasScaleType.WIDTH;
+            }
+            return CanvasScaleType.LARGE;
+        }
+        if (widthScale <= 1.0f && heightScale > 1.0f) {
+            return CanvasScaleType.HEIGHT;
+        }
+        return CanvasScaleType.LARGE;
     }
 
-    private enum ImageSize {
-        SMALL,
-        LARGE,
+    /* 调整图片显示位置  */
+    private void adjustCanvas() {
+        float heightOffset = 0.0f;
+        float widthOffset = 0.0f;
+        if (mCanvasRect.right < getWidth()) {
+            widthOffset = -mCanvasRect.right + getWidth();
+        } else if (mCanvasRect.left > 0) {
+            widthOffset = -mCanvasRect.left;
+        }
+        if (mCanvasRect.bottom < getHeight()) {
+            heightOffset = -mCanvasRect.bottom + getHeight();
+        } else if (mCanvasRect.top > 0) {
+            heightOffset = -mCanvasRect.top;
+        }
+        if (mCanvasScaleType == CanvasScaleType.SMALL) {
+            new TranslateAnimator(mCanvasRect.centerX(), mCanvasRect.centerY(),
+                    mOriginRect.centerX(), mOriginRect.centerY(), 200).start();
+        } else if (mCanvasScaleType == CanvasScaleType.WIDTH) {
+            new TranslateAnimator(0, mCanvasRect.centerY(), widthOffset, mOriginRect.centerY(), 200).start();
+        } else if (mCanvasScaleType == CanvasScaleType.HEIGHT) {
+            new TranslateAnimator(mCanvasRect.centerX(), 0, mOriginRect.centerX(), heightOffset, 200).start();
+        } else {
+            new TranslateAnimator(0, 0, widthOffset, heightOffset, 200).start();
+        }
+    }
+
+    private enum CanvasScaleType {
+        SMALL,  /* 图片显示尺寸小 */
+        WIDTH,  /* 图片显示的横向尺寸大于view，纵向尺寸小于view */
+        HEIGHT, /* 图片显示的的纵向尺寸大于view，横向尺寸小于view */
+        LARGE,  /* 图片显示的横纵向尺寸都大于view */
     }
 
     private class TranslateAnimator {
@@ -316,7 +372,8 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             mAnimator.addUpdateListener(new ScaleAnimationListener(from, to) {
                 @Override
                 public void onAnimationEnd() {
-                    ImageViewer.this.setOnTouchListener(ImageViewer.this);
+                    mCanvasScaleType = getCanvasScaleType();
+                    adjustCanvas();
                 }
             });
         }

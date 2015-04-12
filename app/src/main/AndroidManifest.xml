@@ -21,7 +21,7 @@
             android:label="@string/title_activity_page_view" />
         <activity
             android:name=".imageview.ImageViewerActivity"
-            android:label="@string/title_activity_scalable_image_view"></activity>
+            android:label="@string/title_activity_image_viewer"></activity>
     </application>
 
 </manifest>

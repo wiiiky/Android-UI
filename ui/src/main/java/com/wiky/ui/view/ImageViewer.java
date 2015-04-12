@@ -235,7 +235,7 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         if (scale < mMinScale) {
             new ScaleAnimator(scale, mMinScale, 200).start();
         } else if (scale > mMaxScale) {
-            new ScaleAnimator(scale, mMaxScale, 200).start();
+            new ScaleAnimator(scale, mMaxScale, 200, true).start();
         }
         adjustCanvas();
     }
@@ -294,6 +294,22 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         } else {
             new TranslateAnimator(0, 0, widthOffset, heightOffset, 200).start();
         }
+    }
+
+    private void doAdjust() {
+        float heightOffset = 0.0f;
+        float widthOffset = 0.0f;
+        if (mCanvasRect.right < getWidth()) {
+            widthOffset = -mCanvasRect.right + getWidth();
+        } else if (mCanvasRect.left > 0) {
+            widthOffset = -mCanvasRect.left;
+        }
+        if (mCanvasRect.bottom < getHeight()) {
+            heightOffset = -mCanvasRect.bottom + getHeight();
+        } else if (mCanvasRect.top > 0) {
+            heightOffset = -mCanvasRect.top;
+        }
+        doTranslate(-widthOffset, -heightOffset, true);
     }
 
     private enum CanvasScaleType {
@@ -367,9 +383,13 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         private ValueAnimator mAnimator;
 
         public ScaleAnimator(float from, float to, int duration) {
+            this(from, to, duration, false);
+        }
+
+        public ScaleAnimator(float from, float to, int duration, boolean adjust) {
             mAnimator = ValueAnimator.ofFloat(from, to);
             mAnimator.setDuration(duration);
-            mAnimator.addUpdateListener(new ScaleAnimationListener(from, to) {
+            mAnimator.addUpdateListener(new ScaleAnimationListener(from, to, adjust) {
                 @Override
                 public void onAnimationEnd() {
                     mCanvasScaleType = getCanvasScaleType();
@@ -387,10 +407,12 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
     private abstract class ScaleAnimationListener implements ValueAnimator.AnimatorUpdateListener {
         private float mFrom;
         private float mTo;
+        private boolean mAdjust;
 
-        public ScaleAnimationListener(float from, float to) {
+        public ScaleAnimationListener(float from, float to, boolean adjust) {
             mFrom = from;
             mTo = to;
+            mAdjust = adjust;
         }
 
         @Override
@@ -399,6 +421,9 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             float ds = scale / mFrom;
             mFrom = scale;
             doScale(mCanvasRect.centerX(), mCanvasRect.centerY(), ds);
+            if (mAdjust) {
+                doAdjust();
+            }
             if (scale == mTo) {
                 onAnimationEnd();
             }

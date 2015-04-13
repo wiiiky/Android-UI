@@ -96,7 +96,7 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         mCanvasRect.bottom = y - (y - mCanvasRect.bottom) * factor;
 
         mCanvasScaleType = getCanvasScaleType();
-        if (mCanvasScaleType != CanvasScaleType.SMALL) {
+//        if (mCanvasScaleType != CanvasScaleType.SMALL) {
             float width = getWidth();
             float height = getHeight();
             float cWidth = mCanvasRect.width();
@@ -115,7 +115,7 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
                 mLargeRect.top = (height - cHeight) / 2.0f;
                 mLargeRect.bottom = (height + cHeight) / 2.0f;
             }
-        }
+//        }
         invalidate();
     }
 
@@ -124,9 +124,9 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
      */
     private void doTranslate(float dx, float dy, boolean force) {
         if (!force) {
-            if (mCanvasScaleType == CanvasScaleType.SMALL) {
-                return;
-            }
+//            if (mCanvasScaleType == CanvasScaleType.SMALL) {
+//                return;
+//            }
             float left = mCanvasRect.left - dx;
             float top = mCanvasRect.top - dy;
             float right = mCanvasRect.right - dx;
@@ -143,12 +143,17 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
                 } else {
                     dx = 0;
                 }
-            } else if (right > largeRect.right && dx < 0) {
+            } else if (left < mLargeRect.left) {     /* 当移动范围超过时移动将受到阻力 */
+                dx *= (left - largeRect.left) / (mLargeRect.left - largeRect.left);
+            }
+            if (right > largeRect.right && dx < 0) {
                 if (mCanvasRect.right < largeRect.right) {
                     dx = mCanvasRect.right - largeRect.right;
                 } else {
                     dx = 0;
                 }
+            } else if (right > mLargeRect.right) {
+                dx *= (largeRect.right - right) / (largeRect.right - mLargeRect.right);
             }
             if (top < largeRect.top && dy > 0) {
                 if (mCanvasRect.top > largeRect.top) {
@@ -156,12 +161,17 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
                 } else {
                     dy = 0;
                 }
-            } else if (bottom > largeRect.bottom && dy < 0) {
+            } else if (top < mLargeRect.top) {
+                dy *= (top - largeRect.top) / (mLargeRect.top - largeRect.top);
+            }
+            if (bottom > largeRect.bottom && dy < 0) {
                 if (mCanvasRect.bottom < largeRect.bottom) {
                     dy = mCanvasRect.bottom - largeRect.bottom;
                 } else {
                     dy = 0;
                 }
+            } else if (bottom > mLargeRect.bottom) {
+                dy *= (largeRect.bottom - bottom) / (largeRect.bottom - mLargeRect.bottom);
             }
         }
         mCanvasRect.left -= dx;
@@ -193,6 +203,7 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
             mCanvasRect.top = cy - bHeight / 2.0f * mMinScale;
             mCanvasRect.bottom = cy + bHeight / 2.0f * mMinScale;
             mOriginRect.set(mCanvasRect);
+            mLargeRect.set(mCanvasRect);
 
             mMaxOverTranslate = width * mMaxOverTrans;
         }

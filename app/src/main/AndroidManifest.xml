@@ -21,7 +21,10 @@
             android:label="@string/title_activity_page_view" />
         <activity
             android:name=".imageview.ImageViewerActivity"
-            android:label="@string/title_activity_image_viewer"></activity>
+            android:label="@string/title_activity_image_viewer" />
+        <activity
+            android:name=".widgets.WidgetActivity"
+            android:label="@string/title_activity_widget"></activity>
     </application>
 
 </manifest>

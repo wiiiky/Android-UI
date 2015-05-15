@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.wiky.pageview.R;
 import com.wiky.ui.utils.GoodGestureDetector;
@@ -52,10 +53,10 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
     public ImageViewer(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        init(context, attrs);
+        initialize(context, attrs);
     }
 
-    private void init(Context context, AttributeSet attrs) {
+    private void initialize(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageViewer);
         int id = a.getResourceId(R.styleable.ImageViewer_src, 0);
         if (id != 0) {
@@ -87,7 +88,8 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
     /* 在现有基础上以(x,y)为中心缩放 */
     private void doScale(float x, float y, float factor) {
         float scale = getBitmapScale();
-        if (factor == 1.0f || (factor > 1.0f && scale >= mMaxScale * mMaxOverScale) || (factor < 1.0f && scale <= mMinScale * mMaxBlowScale)) {
+        if (factor == 1.0f || (factor > 1.0f && scale >= mMaxScale * mMaxOverScale) ||
+                (factor < 1.0f && scale <= mMinScale * mMaxBlowScale)) {
             return;
         }
         mCanvasRect.left = x - (x - mCanvasRect.left) * factor;
@@ -96,26 +98,24 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
         mCanvasRect.bottom = y - (y - mCanvasRect.bottom) * factor;
 
         mCanvasScaleType = getCanvasScaleType();
-//        if (mCanvasScaleType != CanvasScaleType.SMALL) {
-            float width = getWidth();
-            float height = getHeight();
-            float cWidth = mCanvasRect.width();
-            float cHeight = mCanvasRect.height();
-            if (width < cWidth) {
-                mLargeRect.left = width - cWidth;
-                mLargeRect.right = cWidth;
-            } else {
-                mLargeRect.left = (width - cWidth) / 2.0f;
-                mLargeRect.right = (width + cWidth) / 2.0f;
-            }
-            if (height < cHeight) {
-                mLargeRect.top = height - cHeight;
-                mLargeRect.bottom = cHeight;
-            } else {
-                mLargeRect.top = (height - cHeight) / 2.0f;
-                mLargeRect.bottom = (height + cHeight) / 2.0f;
-            }
-//        }
+        float width = getWidth();
+        float height = getHeight();
+        float cWidth = mCanvasRect.width();
+        float cHeight = mCanvasRect.height();
+        if (width < cWidth) {
+            mLargeRect.left = width - cWidth;
+            mLargeRect.right = cWidth;
+        } else {
+            mLargeRect.left = (width - cWidth) / 2.0f;
+            mLargeRect.right = (width + cWidth) / 2.0f;
+        }
+        if (height < cHeight) {
+            mLargeRect.top = height - cHeight;
+            mLargeRect.bottom = cHeight;
+        } else {
+            mLargeRect.top = (height - cHeight) / 2.0f;
+            mLargeRect.bottom = (height + cHeight) / 2.0f;
+        }
         invalidate();
     }
 
@@ -124,9 +124,6 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
      */
     private void doTranslate(float dx, float dy, boolean force) {
         if (!force) {
-//            if (mCanvasScaleType == CanvasScaleType.SMALL) {
-//                return;
-//            }
             float left = mCanvasRect.left - dx;
             float top = mCanvasRect.top - dy;
             float right = mCanvasRect.right - dx;
@@ -238,6 +235,22 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
     @Override
     public void onScale(float cx, float cy, float factor) {
         doScale(cx, cy, factor);
+    }
+
+    @Override
+    public void onClick(float x, float y) {
+    }
+
+    @Override
+    public void onDoubleClick(float x, float y) {
+        float scale = getBitmapScale();
+        float to = scale * 1.4f;
+        if (to > mMaxScale) {
+            to = mMaxScale;
+        }
+        new ScaleAnimator(scale, to, 200).start();
+
+        Toast.makeText(getContext(), "Double " + x + "," + y, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -14,7 +14,8 @@ public class GoodGestureDetector {
     private float mLastScrollX;
     private float mLastScrollY;
     private float mLastSpan;
-
+    private MotionEvent mClickEvent = null;
+    private MotionEvent mDoubleEvent = null;
     public GoodGestureDetector(@NonNull Context context, @NonNull OnGestureListener listener) {
         mContext = context;
         mListener = listener;
@@ -28,6 +29,7 @@ public class GoodGestureDetector {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 handled = mListener.onStart(ev);
+                mClickEvent = MotionEvent.obtain(ev);
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (count == 1) {
@@ -37,11 +39,32 @@ public class GoodGestureDetector {
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
+                mClickEvent = null;
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                if (mDoubleEvent != null) {
+                    if (mClickEvent != null) {
+                        mClickEvent = checkClick(mClickEvent, ev);
+                        if (mClickEvent != null) {
+                            mDoubleEvent = checkClick(mDoubleEvent, mClickEvent, 800, 50);
+                            if (mDoubleEvent != null) {
+                                mListener.onDoubleClick(mDoubleEvent.getX(), mDoubleEvent.getY());
+                            }
+                        }
+                    }
+                    mClickEvent = null;
+                    mDoubleEvent = null;
+                } else if (mClickEvent != null) {
+                    mClickEvent = checkClick(mClickEvent, ev);
+                    if (mClickEvent != null) {
+                        mListener.onClick(mClickEvent.getX(), mClickEvent.getY());
+                    }
+                    mDoubleEvent = mClickEvent;
+                    mClickEvent = null;
+                }
                 mListener.onEnd();
                 break;
         }
@@ -54,6 +77,28 @@ public class GoodGestureDetector {
             mLastScrollY = -1;
         }
         return handled;
+    }
+
+    private MotionEvent checkClick(MotionEvent pre, MotionEvent now, long time, long pos) {
+        MotionEvent clickEvent = null;
+        long downTime = pre.getEventTime();
+        long eventTime = now.getEventTime();
+        if (eventTime - downTime < time) {
+            float x1 = pre.getX();
+            float y1 = pre.getY();
+            float x2 = now.getX();
+            float y2 = now.getY();
+            if (Math.abs(x1 - x2) < pos && Math.abs(y1 - y2) < pos) {
+                float x = (x1 + x2) / 2;
+                float y = (y1 + y2) / 2;
+                clickEvent = MotionEvent.obtain(eventTime, eventTime, MotionEvent.ACTION_DOWN, x, y, 0);
+            }
+        }
+        return clickEvent;
+    }
+
+    private MotionEvent checkClick(MotionEvent pre, MotionEvent now) {
+        return checkClick(pre, now, 500, 10);
     }
 
     private void doScroll(MotionEvent ev) {
@@ -95,6 +140,10 @@ public class GoodGestureDetector {
         void onScroll(float dx, float dy);
 
         void onScale(float cx, float cy, float factor);
+
+        void onClick(float x, float y);
+
+        void onDoubleClick(float x, float y);
 
         void onEnd();
     }

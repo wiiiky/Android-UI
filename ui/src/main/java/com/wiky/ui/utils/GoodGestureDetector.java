@@ -14,8 +14,8 @@ public class GoodGestureDetector {
     private float mLastScrollX;
     private float mLastScrollY;
     private float mLastSpan;
-    private MotionEvent mClickEvent = null;
-    private MotionEvent mDoubleEvent = null;
+    private MotionEvent mClickEvent = null;     /* 单击事件 */
+    private MotionEvent mDoubleEvent = null;    /* 双击中的第一次单击 */
     public GoodGestureDetector(@NonNull Context context, @NonNull OnGestureListener listener) {
         mContext = context;
         mListener = listener;
@@ -45,26 +45,7 @@ public class GoodGestureDetector {
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (mDoubleEvent != null) {
-                    if (mClickEvent != null) {
-                        mClickEvent = checkClick(mClickEvent, ev);
-                        if (mClickEvent != null) {
-                            mDoubleEvent = checkClick(mDoubleEvent, mClickEvent, 800, 50);
-                            if (mDoubleEvent != null) {
-                                mListener.onDoubleClick(mDoubleEvent.getX(), mDoubleEvent.getY());
-                            }
-                        }
-                    }
-                    mClickEvent = null;
-                    mDoubleEvent = null;
-                } else if (mClickEvent != null) {
-                    mClickEvent = checkClick(mClickEvent, ev);
-                    if (mClickEvent != null) {
-                        mListener.onClick(mClickEvent.getX(), mClickEvent.getY());
-                    }
-                    mDoubleEvent = mClickEvent;
-                    mClickEvent = null;
-                }
+                onClick(ev);
                 mListener.onEnd();
                 break;
         }
@@ -77,6 +58,29 @@ public class GoodGestureDetector {
             mLastScrollY = -1;
         }
         return handled;
+    }
+
+    private void onClick(MotionEvent ev) {
+        if (mDoubleEvent != null) {
+            if (mClickEvent != null) {
+                mClickEvent = checkClick(mClickEvent, ev);
+                if (mClickEvent != null) {
+                    mDoubleEvent = checkClick(mDoubleEvent, mClickEvent, 800, 100);
+                    if (mDoubleEvent != null) {
+                        mListener.onDoubleClick(mDoubleEvent.getX(), mDoubleEvent.getY());
+                    }
+                }
+            }
+            mClickEvent = null;
+            mDoubleEvent = null;
+        } else if (mClickEvent != null) {
+            mClickEvent = checkClick(mClickEvent, ev);
+            if (mClickEvent != null) {
+                mListener.onClick(mClickEvent.getX(), mClickEvent.getY());
+            }
+            mDoubleEvent = mClickEvent;
+            mClickEvent = null;
+        }
     }
 
     private MotionEvent checkClick(MotionEvent pre, MotionEvent now, long time, long pos) {

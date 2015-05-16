@@ -53,13 +53,13 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
 
     public PageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        initialize(context, attrs);
     }
 
     /*
      * Initialize
      */
-    private void init(Context context, AttributeSet attrs) {
+    private void initialize(Context context, AttributeSet attrs) {
         mCurrentFrame = createFrameLayout(context);
         mNextFrame = createFrameLayout(context);
         mPrevFrame = createFrameLayout(context);
@@ -145,6 +145,7 @@ public class PageView extends RelativeLayout implements View.OnTouchListener {
                 if (fy < 0 && mCurrentFrame.getVisibility() == VISIBLE) {
                     mAction = AnimationAction.NEXT;
                     mCurrentFrame.setY((int) fy / mRI);
+                    mPrevFrame.setY(-getHeight());
                 } else {
                     mCurrentFrame.setY(0);
                     if (mPrevFrame.getVisibility() == VISIBLE) {

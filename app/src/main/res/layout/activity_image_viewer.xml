@@ -6,6 +6,7 @@
     tools:context="com.wiky.customui.imageview.ImageViewerActivity">
 
     <com.wiky.ui.view.ImageViewer
+        android:id="@+id/image_viewer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:background_color="#000000"

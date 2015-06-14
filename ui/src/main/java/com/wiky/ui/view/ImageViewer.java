@@ -13,7 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wiky.pageview.R;
 import com.wiky.ui.utils.GoodGestureDetector;
@@ -243,14 +242,16 @@ public class ImageViewer extends View implements View.OnTouchListener, GoodGestu
 
     @Override
     public void onDoubleClick(float x, float y) {
-        float scale = getBitmapScale();
-        float to = scale * 1.4f;
-        if (to > mMaxScale) {
-            to = mMaxScale;
-        }
-        new ScaleAnimator(scale, to, 200).start();
+//        float scale = getBitmapScale();
+//        float to = scale * 1.4f;
+//        if (to > mMaxScale) {
+//            to = mMaxScale;
+//        }
+//        if(scale<to) {
+//            new ScaleAnimator(scale, to, 200).start();
+//        }
 
-        Toast.makeText(getContext(), "Double " + x + "," + y, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), "Double " + x + "," + y, Toast.LENGTH_SHORT).show();
     }
 
     @Override

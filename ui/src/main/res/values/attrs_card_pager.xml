@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CardPager">
+        <attr name="card_height_ratio" format="float" />
+        <attr name="card_width_ratio" format="float" />
+        <attr name="card_spacing_ratio" format="float" />
+        <attr name="card_over_ratio" format="float" />
+    </declare-styleable>
+</resources>

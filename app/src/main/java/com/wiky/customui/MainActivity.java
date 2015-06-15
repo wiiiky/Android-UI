@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.wiky.customui.cardpager.CardPagerActivity;
 import com.wiky.customui.imageview.ImageViewerActivity;
 import com.wiky.customui.pageview.PageViewActivity;
 import com.wiky.customui.widgets.WidgetActivity;
@@ -28,7 +29,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         ArrayList<MenuAdapter.MenuItem> data = new ArrayList<>();
         data.add(new MenuAdapter.MenuItem("上滑翻页 - PageView", 0));
         data.add(new MenuAdapter.MenuItem("缩放的图片 - ImageViewer", 1));
-        data.add(new MenuAdapter.MenuItem("各种小控件", 2));
+        data.add(new MenuAdapter.MenuItem("CardPager", 2));
+        data.add(new MenuAdapter.MenuItem("各种小控件", 3));
 
         mListView = (ListView) findViewById(R.id.list_view);
         mListView.setOnItemClickListener(this);
@@ -67,6 +69,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         } else if (item.mId == 1) {
             intent = new Intent(this, ImageViewerActivity.class);
         } else if (item.mId == 2) {
+            intent = new Intent(this, CardPagerActivity.class);
+        } else if (item.mId == 3) {
             intent = new Intent(this, WidgetActivity.class);
         }
         startActivity(intent);

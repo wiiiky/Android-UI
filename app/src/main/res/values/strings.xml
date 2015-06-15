@@ -6,4 +6,6 @@
     <string name="title_activity_page_view">PageViewActivity</string>
     <string name="title_activity_image_viewer">ImageViewer</string>
     <string name="title_activity_widget">WidgetActivity</string>
+    <string name="title_activity_card_page">CardPageActivity</string>
+    <string name="title_activity_card_pager">CardPagerActivity</string>
 </resources>

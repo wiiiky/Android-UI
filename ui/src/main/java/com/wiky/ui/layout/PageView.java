@@ -1,4 +1,4 @@
-package com.wiky.ui.container;
+package com.wiky.ui.layout;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;

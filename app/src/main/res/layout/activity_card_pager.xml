@@ -3,17 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wiky.customui.pageview.PageViewActivity">
+    tools:context="com.wiky.customui.cardpager.CardPagerActivity">
 
-    <com.wiky.ui.layout.PageView
-        android:id="@+id/page_view"
+
+    <com.wiky.ui.layout.CardPager
+        android:id="@+id/cardPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:nextBreakPoint="0.3"
-        app:nextDuration="200"
-        app:prevBreakPoint="0.5"
-        app:resetCurrentDuration="150"
-        app:resetPrevDuration="150"
-        app:ri="1.5" />
+        app:card_height_ratio="0.85" />
 
 </RelativeLayout>

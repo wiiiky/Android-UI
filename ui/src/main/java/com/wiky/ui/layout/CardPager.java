@@ -78,6 +78,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
 
     private CardView createCardView(Context ctx) {
         CardView v = new CardView(ctx);
+        v.setVisibility(INVISIBLE);
         v.setRadius(20);
         v.setCardElevation(20);
         addView(v);
@@ -100,6 +101,9 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
         mCard1.removeAllViews();
         mCard2.removeAllViews();
         mCard3.removeAllViews();
+        mCard1.setVisibility(INVISIBLE);
+        mCard2.setVisibility(INVISIBLE);
+        mCard3.setVisibility(INVISIBLE);
         mCard1.setTag(null);
         mCard2.setTag(null);
         mCard3.setTag(null);
@@ -147,6 +151,9 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if (changed) {
             layout(l, t, r, b);
+        }
+        if (mAdapter == null) {
+            return;
         }
 
         int width = r - l;

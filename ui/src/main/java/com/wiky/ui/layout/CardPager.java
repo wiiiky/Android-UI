@@ -39,6 +39,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
     private int mHeight = 0;
     private MotionEvent mEvent;
     private GestureDetector mGestureDetector;
+    private MotionEvent mLastEvent;
 
     public CardPager(Context context) throws Exception {
         this(context, null);
@@ -186,16 +187,21 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int act = event.getAction() & MotionEvent.ACTION_MASK;
-        if (act == MotionEvent.ACTION_DOWN || act == MotionEvent.ACTION_MOVE) {
-            return mGestureDetector.onTouchEvent(event);
+        if (act == MotionEvent.ACTION_DOWN) {
+            mLastEvent = MotionEvent.obtain(event);
+        } else if (act == MotionEvent.ACTION_MOVE) {
+            float dx = event.getRawX() - mLastEvent.getRawX();
+            mOffset += getScrollDistance(dx);
+            requestLayout();
+            mLastEvent = MotionEvent.obtain(event);
         } else {
             if (Math.abs(mOffset) <= (mWidth * mCardOverRatio + 0.05) || (mOffset > 0 && mPosition == 0) || (mOffset < 0 && mPosition >= mAdapter.size() - 1)) {
                 back();
             } else {
                 forward();
             }
-            return mGestureDetector.onTouchEvent(event);
         }
+        return mGestureDetector.onTouchEvent(event);
     }
 
     /*
@@ -227,7 +233,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
             mCard3 = v;
         }
         mOffset -= width * (mCardWidthRatio + mCardSpacingRatio);
-        ValueAnimator animator = createOffsetAnimator(mOffset, 0, 200);
+        ValueAnimator animator = createOffsetAnimator(mOffset, 0);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.start();
     }
@@ -271,7 +277,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
         return animator;
     }
 
-    private float getHoizontalDistance(float dx) {
+    private float getScrollDistance(float dx) {
         int offset = Math.abs(mOffset);
         float width = mWidth * mCardWidthRatio * 0.5f;
         if (offset >= width && dx >= 0) {
@@ -281,10 +287,10 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
         } else if (mPosition >= mAdapter.size() - 1 && mOffset <= -mWidth * mCardOverRatio && dx <= 0) {
             return 0;
         }
-        if ((mPosition == 0 && dx >= 0) || (mPosition >= mAdapter.size() - 1 && dx <= 0)) {
-            return (float) ((1.0f - Math.pow(offset / width, 0.2)) * dx);
+        if ((mPosition <= 0 && dx >= 0) || (mPosition >= mAdapter.size() - 1 && dx <= 0)) {
+            return (float) ((1.0f - Math.pow(offset / width, 0.1)) * dx);
         }
-        return (float) ((1.0f - Math.pow(offset / width, 0.5)) * dx);
+        return (float) ((1.0f - Math.pow(offset / width, 0.4)) * dx);
     }
 
     @Override
@@ -299,6 +305,9 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
+        if (mCard2.getVisibility() != VISIBLE) {
+            return false;
+        }
         float x = e.getX();
         float y = e.getY();
         Rect rect = new Rect();
@@ -312,13 +321,14 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        mOffset += getHoizontalDistance(-distanceX);
-        requestLayout();
-        return true;
+        return false;
     }
 
     @Override
     public void onLongPress(MotionEvent e) {
+        if (mCard2.getVisibility() != VISIBLE) {
+            return;
+        }
         float x = e.getX();
         float y = e.getY();
         Rect rect = new Rect();

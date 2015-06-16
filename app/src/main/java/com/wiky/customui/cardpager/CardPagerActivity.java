@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.wiky.customui.R;
 import com.wiky.ui.adapter.CardAdapter;
@@ -29,7 +30,6 @@ public class CardPagerActivity extends ActionBarActivity {
             public CardAdapter.ViewHolder createViewHolder(CardView cardView, int i) {
                 View v = LayoutInflater.from(CardPagerActivity.this).inflate(R.layout.item_card_pager, cardView, false);
                 v.setLayoutParams(new CardView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                //v.setBackgroundColor(Color.BLUE);
                 return new ViewHolder(v);
             }
 
@@ -42,6 +42,11 @@ public class CardPagerActivity extends ActionBarActivity {
                 } else {
                     viewHolder.mView.setBackgroundColor(Color.BLUE);
                 }
+            }
+
+            @Override
+            public void onItemClick(CardView cardView, CardAdapter.ViewHolder viewHolder, int i) {
+                Toast.makeText(CardPagerActivity.this, "single tap", Toast.LENGTH_LONG).show();
             }
 
 

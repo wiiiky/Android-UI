@@ -1,6 +1,5 @@
 package com.wiky.customui.cardpager;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
@@ -9,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wiky.customui.R;
@@ -35,13 +35,8 @@ public class CardPagerActivity extends ActionBarActivity {
 
             @Override
             public void showViewHolder(CardView cardView, CardAdapter.ViewHolder viewHolder, int i) {
-                if (i == 0) {
-                    viewHolder.mView.setBackgroundColor(Color.GREEN);
-                } else if (i == 1) {
-                    viewHolder.mView.setBackgroundColor(Color.RED);
-                } else {
-                    viewHolder.mView.setBackgroundColor(Color.BLUE);
-                }
+                ViewHolder holder = (ViewHolder) viewHolder;
+                holder.mTv.setText(String.valueOf(i) + " Index");
             }
 
             @Override
@@ -57,8 +52,11 @@ public class CardPagerActivity extends ActionBarActivity {
 
             class ViewHolder extends CardAdapter.ViewHolder {
 
+                public TextView mTv;
+
                 public ViewHolder(View v) {
                     super(v);
+                    mTv = (TextView) v.findViewById(R.id.tvHello);
                 }
             }
         };

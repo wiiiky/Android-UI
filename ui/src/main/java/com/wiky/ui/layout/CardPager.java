@@ -255,8 +255,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                Integer offset = (Integer) animation.getAnimatedValue();
-                mOffset = offset;
+                mOffset = (Integer) animation.getAnimatedValue();
                 requestLayout();
             }
         });
@@ -285,18 +284,23 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
     }
 
     private float getScrollDistance(float dx) {
+        if (mOffset * dx < 0) {
+            return dx;
+        }
         int offset = Math.abs(mOffset);
         float width = mWidth * mCardWidthRatio * 0.5f;
         if (offset >= width && dx >= 0) {
             return 0;
+        }
+        if ((mPosition <= 0 && dx >= 0) || (mPosition >= mAdapter.size() - 1 && dx <= 0)) {
+            /* 边缘 */
+            return (float) ((1.0f - Math.pow(offset / width, 0.2)) * dx);
         } else if (mPosition == 0 && mOffset >= mWidth * mCardOverRatio && dx >= 0) {
             return 0;
         } else if (mPosition >= mAdapter.size() - 1 && mOffset <= -mWidth * mCardOverRatio && dx <= 0) {
             return 0;
         }
-        if ((mPosition <= 0 && dx >= 0) || (mPosition >= mAdapter.size() - 1 && dx <= 0)) {
-            return (float) ((1.0f - Math.pow(offset / width, 0.1)) * dx);
-        }
+
         return (float) ((1.0f - Math.pow(offset / width, 0.4)) * dx);
     }
 

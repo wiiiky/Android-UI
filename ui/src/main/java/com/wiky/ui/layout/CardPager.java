@@ -32,7 +32,10 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
     private float mCardWidthRatio = 0.84f;
     private float mCardSpacingRatio = 0.04f;
     private float mCardShowRatio = (1.0f - mCardWidthRatio - mCardSpacingRatio * 2.0f) / 2.0f;
-    private float mCardOverRatio = 0.15f;
+    private float mCardOverRatio = 0.15f;   /* 超过15% 则进入下一页 */
+    private float mCardOverMaxRatio = 0.5f; /* 滑动可以超过的最大百分比 */
+    private float mCardDragIndex = 0.4f;    /* 拉动到下一页的指数 */
+    private float mCardDragEmptyIndex = 0.2f;   /* 拉动到空白地区的指数 */
 
     private boolean mPositionChanged = false;
     private int mWidth = 0;
@@ -57,6 +60,9 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
         mCardWidthRatio = a.getFloat(R.styleable.CardPager_card_width_ratio, 0.84f);
         mCardSpacingRatio = a.getFloat(R.styleable.CardPager_card_spacing_ratio, 0.04f);
         mCardOverRatio = a.getFloat(R.styleable.CardPager_card_over_ratio, 0.15f);
+        mCardOverMaxRatio = a.getFloat(R.styleable.CardPager_card_over_max_ratio, 0.5f);
+        mCardDragEmptyIndex = a.getFloat(R.styleable.CardPager_card_drag_empty_index, 0.4f);
+        mCardDragIndex = a.getFloat(R.styleable.CardPager_card_drag_index, 0.2f);
         a.recycle();
 
         if (mCardHeightRatio <= 0.0f || mCardHeightRatio > 1.0f) {
@@ -191,8 +197,20 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
         mPositionChanged = false;
     }
 
+    private void finishTouch() {
+        if (Math.abs(mOffset) <= (mWidth * mCardOverRatio + 0.05) || (mOffset > 0 && mPosition == 0) || (mOffset < 0 && mPosition >= mAdapter.size() - 1)) {
+            back();
+        } else {
+            forward();
+        }
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        if (event.getPointerCount() != 1) {
+            finishTouch();
+            return false;
+        }
         int act = event.getAction() & MotionEvent.ACTION_MASK;
         if (act == MotionEvent.ACTION_DOWN) {
             mLastEvent = MotionEvent.obtain(event);
@@ -202,11 +220,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
             requestLayout();
             mLastEvent = MotionEvent.obtain(event);
         } else {
-            if (Math.abs(mOffset) <= (mWidth * mCardOverRatio + 0.05) || (mOffset > 0 && mPosition == 0) || (mOffset < 0 && mPosition >= mAdapter.size() - 1)) {
-                back();
-            } else {
-                forward();
-            }
+            finishTouch();
         }
         return mGestureDetector.onTouchEvent(event);
     }
@@ -288,20 +302,20 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
             return dx;
         }
         int offset = Math.abs(mOffset);
-        float width = mWidth * mCardWidthRatio * 0.5f;
+        float width = mWidth * mCardWidthRatio * mCardOverMaxRatio;
         if (offset >= width && dx >= 0) {
             return 0;
         }
         if ((mPosition <= 0 && dx >= 0) || (mPosition >= mAdapter.size() - 1 && dx <= 0)) {
             /* 边缘 */
-            return (float) ((1.0f - Math.pow(offset / width, 0.2)) * dx);
+            return (float) ((1.0f - Math.pow(offset / width, mCardDragEmptyIndex)) * dx);
         } else if (mPosition == 0 && mOffset >= mWidth * mCardOverRatio && dx >= 0) {
             return 0;
         } else if (mPosition >= mAdapter.size() - 1 && mOffset <= -mWidth * mCardOverRatio && dx <= 0) {
             return 0;
         }
 
-        return (float) ((1.0f - Math.pow(offset / width, 0.4)) * dx);
+        return (float) ((1.0f - Math.pow(offset / width, mCardDragIndex)) * dx);
     }
 
     @Override

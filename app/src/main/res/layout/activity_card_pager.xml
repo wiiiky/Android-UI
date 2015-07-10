@@ -10,8 +10,8 @@
         android:id="@+id/cardPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:card_drag_empty_index="0.1"
-        app:card_drag_index="0.4"
+        app:card_drag_empty_index="0.2"
+        app:card_drag_index="1"
         app:card_height_ratio="0.85"
         app:card_over_max_ratio="0.85"
         app:card_over_ratio="0.05" />

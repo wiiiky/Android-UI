@@ -207,10 +207,6 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (event.getPointerCount() != 1) {
-            finishTouch();
-            return false;
-        }
         int act = event.getAction() & MotionEvent.ACTION_MASK;
         if (act == MotionEvent.ACTION_DOWN) {
             mLastEvent = MotionEvent.obtain(event);
@@ -219,7 +215,7 @@ public class CardPager extends ViewGroup implements View.OnTouchListener, Gestur
             mOffset += getScrollDistance(dx);
             requestLayout();
             mLastEvent = MotionEvent.obtain(event);
-        } else {
+        } else if (act == MotionEvent.ACTION_CANCEL || act == MotionEvent.ACTION_UP) {
             finishTouch();
         }
         return mGestureDetector.onTouchEvent(event);

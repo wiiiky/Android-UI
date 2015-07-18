@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.wiky.customui.cardpager.CardPagerActivity;
 import com.wiky.customui.imageview.ImageViewerActivity;
 import com.wiky.customui.pageview.PageViewActivity;
 import com.wiky.customui.widgets.WidgetActivity;
@@ -44,7 +43,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         } else if (item.mId == 1) {
             intent = new Intent(this, ImageViewerActivity.class);
         } else if (item.mId == 2) {
-            intent = new Intent(this, CardPagerActivity.class);
         } else if (item.mId == 3) {
             intent = new Intent(this, WidgetActivity.class);
         }

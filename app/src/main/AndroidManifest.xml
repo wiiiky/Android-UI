@@ -25,9 +25,6 @@
         <activity
             android:name=".widgets.WidgetActivity"
             android:label="@string/title_activity_widget" />
-        <activity
-            android:name=".cardpager.CardPagerActivity"
-            android:label="@string/title_activity_card_pager"></activity>
     </application>
 
 </manifest>

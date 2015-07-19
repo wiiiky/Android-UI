@@ -8,4 +8,5 @@
     <string name="title_activity_widget">WidgetActivity</string>
     <string name="title_activity_card_page">CardPageActivity</string>
     <string name="title_activity_card_pager">CardPagerActivity</string>
+    <string name="title_activity_segment">SegmentActivity</string>
 </resources>

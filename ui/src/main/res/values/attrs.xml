@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ImageViewer">
+        <attr name="src" format="integer" />
+        <attr name="background_color" format="color|integer|string" />
+        <attr name="maxScale" format="float" />
+        <attr name="maxOverScale" format="float" />
+        <attr name="maxBlowScale" format="float" />
+        <attr name="maxOverTrans" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="PageView">
+        <attr name="nextBreakPoint" format="float" />
+        <attr name="prevBreakPoint" format="float" />
+        <attr name="resetCurrentDuration" format="integer" />
+        <attr name="resetPrevDuration" format="integer" />
+        <attr name="nextDuration" format="integer" />
+        <attr name="prevDuration" format="integer" />
+        <attr name="ri" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="SegmentPager">
+        <attr name="segment_width_ratio" format="float" />
+        <attr name="segment_spacing_ratio" format="float" />
+        <attr name="scroll_critical_ratio" format="float" />
+        <attr name="max_scroll_ratio" format="float" />
+        <attr name="max_scroll_over_ratio" format="float" />
+        <attr name="max_scroll_forward_duration" format="integer" />
+        <attr name="max_scroll_over_back_duration" format="integer" />
+        <attr name="max_scroll_back_duration" format="integer" />
+    </declare-styleable>
+</resources>

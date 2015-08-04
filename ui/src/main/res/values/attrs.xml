@@ -43,4 +43,9 @@
         <attr name="contentPaddingTop" format="dimension" />
         <attr name="contentPaddingBottom" format="dimension" />
     </declare-styleable>
+
+
+    <declare-styleable name="CircleView">
+        <attr name="circleBackgroundColor" format="color"/>
+    </declare-styleable>
 </resources>

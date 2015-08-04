@@ -8,9 +8,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.wiky.customui.widgets.WidgetActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+
+    <com.wiky.ui.cardview.CircleView
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
 
 </RelativeLayout>

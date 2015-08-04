@@ -12,10 +12,11 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
-import com.wiky.pageview.R;
+import com.wiky.ui.R;
 import com.wiky.ui.utils.SimpleAnimatorListener;
 
 import java.security.InvalidParameterException;
+
 /**
  * Created by wiky on 7/16/15.
  */

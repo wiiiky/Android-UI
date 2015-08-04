@@ -16,6 +16,7 @@ public class GoodGestureDetector {
     private float mLastSpan;
     private MotionEvent mClickEvent = null;     /* 单击事件 */
     private MotionEvent mDoubleEvent = null;    /* 双击中的第一次单击 */
+
     public GoodGestureDetector(@NonNull Context context, @NonNull OnGestureListener listener) {
         mContext = context;
         mListener = listener;

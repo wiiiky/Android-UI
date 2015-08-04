@@ -10,6 +10,7 @@ public abstract class SimpleAnimatorListener implements Animator.AnimatorListene
     public void onAnimationStart(Animator animation) {
 
     }
+
     @Override
     public void onAnimationCancel(Animator animation) {
 

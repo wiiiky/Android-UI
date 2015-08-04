@@ -1,11 +1,9 @@
 package com.wiky.customui.segmentpager;
 
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -24,9 +22,9 @@ public class SegmentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_segment);
 
-        mPager= (SegmentPager) findViewById(R.id.segment_pager);
+        mPager = (SegmentPager) findViewById(R.id.segment_pager);
 
-        List<Integer> colors=new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
         colors.add(Color.RED);
         colors.add(Color.GRAY);
         colors.add(Color.YELLOW);
@@ -35,24 +33,24 @@ public class SegmentActivity extends AppCompatActivity {
         mPager.setAdapter(new SegmentAdapter(colors));
     }
 
-    private class SegmentAdapter extends RecyclerView.Adapter{
+    private class SegmentAdapter extends RecyclerView.Adapter {
 
         private List<Integer> mColors;
 
-        public SegmentAdapter(List<Integer> colors){
-            mColors=colors;
+        public SegmentAdapter(List<Integer> colors) {
+            mColors = colors;
         }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v=new View(parent.getContext());
+            View v = new View(parent.getContext());
             v.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             return new ViewHolder(v);
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            ViewHolder viewHolder= (ViewHolder) holder;
+            ViewHolder viewHolder = (ViewHolder) holder;
             viewHolder.itemView.setBackgroundColor(mColors.get(position));
         }
 
@@ -61,7 +59,7 @@ public class SegmentActivity extends AppCompatActivity {
             return mColors.size();
         }
 
-        private class ViewHolder extends RecyclerView.ViewHolder{
+        private class ViewHolder extends RecyclerView.ViewHolder {
 
             public ViewHolder(View itemView) {
                 super(itemView);

@@ -14,7 +14,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.wiky.pageview.R;
+import com.wiky.ui.R;
 import com.wiky.ui.adapter.PageAdapter;
 
 

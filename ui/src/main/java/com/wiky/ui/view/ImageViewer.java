@@ -14,7 +14,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.wiky.pageview.R;
+import com.wiky.ui.R;
 import com.wiky.ui.utils.GoodGestureDetector;
 
 /**

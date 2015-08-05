@@ -33,6 +33,12 @@ public class SegmentActivity extends AppCompatActivity {
         mPager.setAdapter(new SegmentAdapter(colors));
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+        overridePendingTransition(R.anim.from_left, R.anim.to_right);
+    }
+
     private class SegmentAdapter extends RecyclerView.Adapter {
 
         private List<Integer> mColors;

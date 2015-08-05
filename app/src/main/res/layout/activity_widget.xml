@@ -11,6 +11,6 @@
 
     <com.wiky.ui.cardview.CircleView
         android:layout_width="100dp"
-        android:layout_height="100dp"/>
+        android:layout_height="100dp" />
 
 </RelativeLayout>

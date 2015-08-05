@@ -10,6 +10,7 @@ import android.widget.ListView;
 import com.wiky.customui.imageview.ImageViewerActivity;
 import com.wiky.customui.pageview.PageViewActivity;
 import com.wiky.customui.segmentpager.SegmentActivity;
+import com.wiky.customui.slidedrawer.SlideDrawerActivity;
 import com.wiky.customui.widgets.WidgetActivity;
 
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         data.add(new MenuAdapter.MenuItem("上滑翻页 - PageView", 0));
         data.add(new MenuAdapter.MenuItem("缩放的图片 - ImageViewer", 1));
         data.add(new MenuAdapter.MenuItem("SegmentPager", 2));
-        data.add(new MenuAdapter.MenuItem("各种小控件", 3));
+        data.add(new MenuAdapter.MenuItem("SlideDrawer", 3));
+        data.add(new MenuAdapter.MenuItem("各种小控件", 4));
 
         mListView = (ListView) findViewById(R.id.list_view);
         mListView.setOnItemClickListener(this);
@@ -46,6 +48,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         } else if (item.mId == 2) {
             intent = new Intent(this, SegmentActivity.class);
         } else if (item.mId == 3) {
+            intent = new Intent(this, SlideDrawerActivity.class);
+        } else if (item.mId == 4) {
             intent = new Intent(this, WidgetActivity.class);
         }
         startActivity(intent);

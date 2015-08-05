@@ -13,6 +13,8 @@ import com.wiky.ui.R;
  * Created by wiky on 8/4/15.
  */
 public class CircleView extends View{
+    private CircleDrawableWithShadow mDrawable;
+
     public CircleView(Context context) {
         this(context, null);
     }
@@ -26,8 +28,6 @@ public class CircleView extends View{
 
         initialize(context, attrs);
     }
-
-    private CircleDrawableWithShadow mDrawable;
 
     private void initialize(Context context, AttributeSet attrs){
 

@@ -16,12 +16,16 @@ import com.wiky.ui.R;
  */
 public class CircleDrawableWithShadow extends Drawable {
 
-    private Paint mShadowPaint =new Paint();
-    private Paint mCirclePaint=new Paint();
     private final int mShadowSize;
     private final int mShadowStartColor;
     private final int mShadowEndColor;
+    private Paint mShadowPaint =new Paint();
+    private Paint mCirclePaint=new Paint();
     private boolean mDirty=true;
+    private float mCenterX;
+    private float mCenterY;
+    private float mShadowRadius;
+    private float mCircleRadius;
 
     public CircleDrawableWithShadow(Resources resources, int color){
         mShadowSize=resources.getDimensionPixelSize(R.dimen.cardview_default_elevation);
@@ -35,7 +39,6 @@ public class CircleDrawableWithShadow extends Drawable {
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(color);
     }
-
 
     @Override
     public int getIntrinsicWidth(){
@@ -69,11 +72,6 @@ public class CircleDrawableWithShadow extends Drawable {
     private void drawCircle(Canvas canvas){
         canvas.drawCircle(mCenterX, mCenterY, mCircleRadius, mCirclePaint);
     }
-
-    private float mCenterX;
-    private float mCenterY;
-    private float mShadowRadius;
-    private float mCircleRadius;
 
     private void buildComponents(){
         mDirty=false;

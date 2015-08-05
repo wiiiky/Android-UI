@@ -27,7 +27,10 @@
             android:label="@string/title_activity_widget" />
         <activity
             android:name=".segmentpager.SegmentActivity"
-            android:label="@string/title_activity_segment"></activity>
+            android:label="@string/title_activity_segment" />
+        <activity
+            android:name=".slidedrawer.SlideDrawerActivity"
+            android:label="@string/title_activity_slide_drawer"></activity>
     </application>
 
 </manifest>

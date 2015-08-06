@@ -48,4 +48,9 @@
     <declare-styleable name="CircleView">
         <attr name="circleBackgroundColor" format="color" />
     </declare-styleable>
+
+    <declare-styleable name="SlideDrawer">
+        <attr name="drawWidth" format="dimension"/>
+        <attr name="drawWidthRatio" format="float"/>
+    </declare-styleable>
 </resources>

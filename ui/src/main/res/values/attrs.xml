@@ -53,4 +53,16 @@
         <attr name="drawWidth" format="dimension"/>
         <attr name="drawWidthRatio" format="float"/>
     </declare-styleable>
+
+    <declare-styleable name="CardStack">
+        <attr name="card_padding_left" format="dimension" />
+        <attr name="card_padding_right" format="dimension" />
+        <attr name="card_padding_top" format="dimension" />
+        <attr name="card_padding_bottom" format="dimension" />
+        <attr name="card_padding" format="dimension" />
+        <attr name="card_layout_orientation">
+            <enum name="vertical" value="1" />
+            <enum name="horizontal" value="0" />
+        </attr>
+    </declare-styleable>
 </resources>

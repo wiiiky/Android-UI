@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wiky.customui.slidedrawer.SlideDrawerActivity">
+    tools:context="com.wiky.customui.activity.SlideDrawerActivity">
 
     <com.wiky.ui.layout.SlideDrawer
         android:layout_width="match_parent"

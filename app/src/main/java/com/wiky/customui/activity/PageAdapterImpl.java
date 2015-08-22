@@ -1,4 +1,4 @@
-package com.wiky.customui.pageview;
+package com.wiky.customui.activity;
 
 import android.content.Context;
 import android.graphics.Color;

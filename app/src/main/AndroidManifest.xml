@@ -17,19 +17,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".pageview.PageViewActivity"
+            android:name=".activity.PageViewActivity"
             android:label="@string/title_activity_page_view" />
         <activity
-            android:name=".imageview.ImageViewerActivity"
+            android:name=".activity.ImageViewerActivity"
             android:label="@string/title_activity_image_viewer" />
         <activity
-            android:name=".widgets.WidgetActivity"
+            android:name=".activity.WidgetActivity"
             android:label="@string/title_activity_widget" />
         <activity
-            android:name=".segmentpager.SegmentActivity"
+            android:name=".activity.SegmentActivity"
             android:label="@string/title_activity_segment" />
         <activity
-            android:name=".slidedrawer.SlideDrawerActivity"
+            android:name=".activity.SlideDrawerActivity"
             android:label="@string/title_activity_slide_drawer"></activity>
     </application>
 

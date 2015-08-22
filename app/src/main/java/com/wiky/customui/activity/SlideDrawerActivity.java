@@ -1,4 +1,4 @@
-package com.wiky.customui.slidedrawer;
+package com.wiky.customui.activity;
 
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;

@@ -1,4 +1,4 @@
-package com.wiky.customui.segmentpager;
+package com.wiky.customui.activity;
 
 import android.graphics.Color;
 import android.os.Bundle;

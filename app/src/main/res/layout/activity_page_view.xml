@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wiky.customui.pageview.PageViewActivity">
+    tools:context="com.wiky.customui.activity.PageViewActivity">
 
     <com.wiky.ui.layout.PageView
         android:id="@+id/page_view"

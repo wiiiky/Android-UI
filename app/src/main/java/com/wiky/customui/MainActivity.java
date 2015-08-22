@@ -7,11 +7,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.wiky.customui.imageview.ImageViewerActivity;
-import com.wiky.customui.pageview.PageViewActivity;
-import com.wiky.customui.segmentpager.SegmentActivity;
-import com.wiky.customui.slidedrawer.SlideDrawerActivity;
-import com.wiky.customui.widgets.WidgetActivity;
+import com.wiky.customui.activity.ImageViewerActivity;
+import com.wiky.customui.activity.PageViewActivity;
+import com.wiky.customui.activity.SegmentActivity;
+import com.wiky.customui.activity.SlideDrawerActivity;
+import com.wiky.customui.activity.WidgetActivity;
 
 import java.util.ArrayList;
 

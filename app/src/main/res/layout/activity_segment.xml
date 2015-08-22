@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wiky.customui.segmentpager.SegmentActivity">
+    tools:context="com.wiky.customui.activity.SegmentActivity">
 
     <com.wiky.ui.layout.SegmentPager
         android:id="@+id/segment_pager"
